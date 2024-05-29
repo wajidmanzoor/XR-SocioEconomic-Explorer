@@ -1,185 +1,143 @@
 <!DOCTYPE html>
 <html lang="en">
 
-  <head>
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <script src="https://aframe.io/releases/1.2.0/aframe.min.js"></script>
+  <script src="https://d3js.org/d3.v6.min.js"></script>
+  <link rel="icon" href="icons8-favicon-32.png" type="image/x-icon">
+</head>
 
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <script src="https://aframe.io/releases/1.2.0/aframe.min.js"></script>
-    <script src="https://d3js.org/d3.v6.min.js"></script>
-    <link rel="icon" href="icons8-favicon-32.png" type="image/x-icon">
+<body>
 
-  </head>
+  <a-scene vr-mode-ui="enabled: true">
+    <a-entity id="cameraRig">
+      <a-camera id="camera" position="0 4 15"></a-camera>
+    </a-entity>
+  </a-scene>
 
-  <body>
+</body>
 
-    <a-scene vr-mode-ui="enabled: true">
+<script>
+  let columns;
+  let rows;
+  let dataArray;
 
-      <a-entity id="cameraRig">
-
-        <a-camera id="camera" position="0 4 15"></a-camera>
-
-      </a-entity>
-      <!-- <a-entity id="myButton" geometry="primitive: plane; height: 0.5; width: 1" 
-      material="color: blue"
-      position="-6 4 12"
-      text="value: Click Me; align: center;"></a-entity> -->
-
-    </a-scene>
-
-  </body>
-
-  <script>
-    let columnNames;
-    let rowNames;
-    let dataArray;
-
-    document.addEventListener('DOMContentLoaded', () => {
-      d3.csv("Rural Population.csv").then(data => {
-          ({ columnNames, rowNames, dataArray } = processData(data));
-          create2DPlot();
-        }).catch(error => {
-        console.error('Error loading the CSV file:', error);
-      });
-
-        function processData(data) {
-
-          const columnNames = Object.keys(data[0]);
-          const rowNames = [];
-          const dataArray = [];
-
-          data.forEach(row => {
-
-            const rowName = row[columnNames.slice(-1)[0]];
-            rowNames.push(rowName);
-
-            const rowData = columnNames.slice(0,-1).map(colName => parseFloat(row[colName]));
-            dataArray.push(rowData);
-
-          });
-
-          return { columnNames, rowNames, dataArray };
-        };
-
-        function create2DPlot() {
-
-          const totalCons = rowNames.length;
-          var labelCons = Array.from({ length: totalCons }, (_, i) => i-(totalCons-1)/2);
-          
-          const totalYear = columnNames.length;
-          var labelYears = Array.from({ length: totalYear }, (_, i) => i-(totalYear-1)/2);
-          
-          var years = columnNames.slice(0,-1);
-          var countries = rowNames;
-
-          const scene = document.querySelector('a-scene');
-
-          const width = totalCons+3;
-          const height = totalYear+2;
-
-          const plane1 = document.createElement('a-plane');
-          
-          plane1.setAttribute("color","#7BC8A4");
-          plane1.setAttribute('position', `0 0 0`);
-          plane1.setAttribute('rotation','-90 0 0 ');
-          plane1.setAttribute('width',`${width}`);
-          plane1.setAttribute('height',`${height}`);
-          scene.appendChild(plane1);
-
-          const plane = document.querySelector('a-plane');
-          
-          const colorScheme = d3.scaleOrdinal()
-          .domain(rowNames) 
-          .range(d3.schemeCategory10);
-
-            for (let i = 0; i <  totalCons; i++) {
-              for (let j = 0; j < totalYear-1; j++) {
-                
-                if(i==0){
-
-                  const text3 = document.createElement('a-text');
-
-                  text3.setAttribute('value',`${years[j]}` );
-                  text3.setAttribute("color","#000");
-                  text3.setAttribute('position', `${-1*(width/2 - 1)} ${labelYears[j]} 0`);
-                  text3.setAttribute('rotation','0 0 0 ');
-                  plane.appendChild(text3);
-
-                  const text5 = document.createElement('a-text');
-
-                  text5.setAttribute('value',`${years[j]}` );
-                  text5.setAttribute("color","#000");
-                  text5.setAttribute('position', `${width/2 - 1.5} ${labelYears[j]} 0`);
-                  text5.setAttribute('rotation','0 0 0 ');
-                  plane.appendChild(text5);
-
-                };
-
-                const text = document.createElement('a-text');
-
-                text.setAttribute('value',`${dataArray[i][j].toFixed(1)}` );
-                text.setAttribute("color","#000");
-                text.setAttribute('position', `${labelCons[i]-0.2} ${labelYears[j]} ${dataArray[i][j]/10+0.2}`);
-                text.setAttribute('rotation','90 0 0 ');
-                plane.appendChild(text);
-              
-                const bar = document.createElement("a-cylinder");
-
-                bar.setAttribute('position',`${labelCons[i]} ${labelYears[j]} ${dataArray[i][j]/20}`);
-                bar.setAttribute('rotation','90 0 0')
-                bar.setAttribute('radius',0.2);
-                bar.setAttribute('height',`${dataArray[i][j]/10}`);
-                bar.setAttribute('color',`${colorScheme(labelCons[i])}`);
-                bar.setAttribute('opacity','0.7')
-                plane.appendChild(bar);
-
-              };
-
-              const text2 = document.createElement('a-text');
-
-              text2.setAttribute('value',`${countries[i]}` );
-              text2.setAttribute("color","#000");
-              text2.setAttribute('position', `${labelCons[i]} ${-1*(height/2)} 0 `);
-              text2.setAttribute('rotation','0 0 90 ');
-              plane.appendChild(text2);
-              
-              const text4 = document.createElement('a-text');
-
-              text4.setAttribute('value',`${countries[i]}` );
-              text4.setAttribute("color","#000");
-              text4.setAttribute('position', `${labelCons[i]} ${height/2-2} 0 `);
-              text4.setAttribute('rotation','0 0 90 ');
-              plane.appendChild(text4);
-              
-            };
-
-            
-
-        };
-
-      /*const scene = document.querySelector('a-scene');
-     
-
-
-      const sky1 = document.createElement("a-sky");
-
-      sky1.setAttribute("color","#E8FCFF");
-      scene.appendChild(sky1);
-      const button = document.getElementById('myButton');
-    
-      button.addEventListener('click', function() {
-        // Change the color of the box
-        button.setAttribute('material', 'color', 'red');
-        // Display an alert as an example of additional functionality
-      });*/
-    
-      
-
+  document.addEventListener('DOMContentLoaded', () => {
+    d3.csv("Rural Population.csv").then(data => {
+      ({ columns, rows, dataArray } = processData(data));
+      createplane();
+      //create2DPlot();
+    }).catch(error => {
+      console.error('Error loading the CSV file:', error);
     });
 
-  </script>
+    function processData(data) {
+      const columns = Object.keys(data[0]);
+      const rows = [];
+      const dataArray = [];
 
+      data.forEach(row => {
+        const rowName = row[columns.slice(-1)[0]];
+        rows.push(rowName);
+
+        const rowData = columns.slice(0, -1).map(colName => parseFloat(row[colName]));
+        dataArray.push(rowData);
+      });
+
+      return { columns, rows, dataArray };
+    };
+
+    function createplane(){
+      const totalRows = rows.length;
+      const rowPositions = Array.from({ length: totalRows }, (_, i) => i - (totalRows - 1) / 2);
+
+      const totalCols = columns.length;
+      const columnPositions = Array.from({ length: totalCols }, (_, i) => i - (totalCols - 1) / 2);
+
+      const columnNames = columns.slice(0, -1);
+      const rowNames = rows;
+
+      const scene = document.querySelector('a-scene');
+      const width = totalRows + 3;
+      const height = totalCols + 2;
+
+      const plane = document.createElement('a-plane');
+      plane.setAttribute("color", "#7BC8A4");
+      plane.setAttribute('position', `0 0 0`);
+      plane.setAttribute('rotation', '-90 0 0');
+      plane.setAttribute('width', `${width}`);
+      plane.setAttribute('height', `${height}`);
+      scene.appendChild(plane);
+
+      for (let i = 0; i <  totalRows; i++)
+      {
+        for (let j = 0; j < totalCols-1; j++)
+        {
+          if(i==0)
+          {
+            const columnLabelLeft = document.createElement('a-text');
+            columnLabelLeft.setAttribute('value',`${columnNames[j]}` );
+            columnLabelLeft.setAttribute("color","#000");
+            columnLabelLeft.setAttribute('position', `${-1*(width/2 - 1)} ${columnPositions[j]+0.5} 0`);
+            columnLabelLeft.setAttribute('rotation','0 0 0 ');
+            plane.appendChild(columnLabelLeft);
+
+            const columnLabelRight = document.createElement('a-text');
+            columnLabelRight.setAttribute('value',`${columnNames[j]}` );
+            columnLabelRight.setAttribute("color","#000");
+            columnLabelRight.setAttribute('position', `${width/2 - 1} ${columnPositions[j]+0.5} 0`);
+            columnLabelRight.setAttribute('rotation','0 0 0 ');
+            plane.appendChild(columnLabelRight);
+
+          };
+        };
+          const rowLabelFront = document.createElement('a-text');
+
+              rowLabelFront.setAttribute('value',`${rowNames[i]}` );
+              rowLabelFront.setAttribute("color","#000");
+              rowLabelFront.setAttribute('position', `${rowPositions[i]} ${-1*(height/2)} 0 `);
+              rowLabelFront.setAttribute('rotation','0 0 90 ');
+              plane.appendChild(rowLabelFront);
+              
+              const rowLabelBack = document.createElement('a-text');
+
+              rowLabelBack.setAttribute('value',`${rowNames[i]}` );
+              rowLabelBack.setAttribute("color","#000");
+              rowLabelBack.setAttribute('position', `${rowPositions[i]} ${height/2-1} 0 `);
+              rowLabelBack.setAttribute('rotation','0 0 90 ');
+              plane.appendChild(rowLabelBack);        
+        };
+
+      const plane1 = document.createElement('a-plane');
+      plane1.setAttribute("color", "blue");
+      plane1.setAttribute('position', `0 0 0.2`);
+      plane1.setAttribute('rotation', '0 0 0');
+      plane1.setAttribute('width', `${width-4}`);
+      plane1.setAttribute('height', `${height-4}`);
+      plane.appendChild(plane1);
+
+      const colorScheme = d3.scaleOrdinal()
+      .domain(rows) 
+      .range(d3.schemeCategory10);
+    for (let i = 0; i <  totalRows; i++) {
+      for (let j = 0; j < totalCols-1; j++) {
+
+        const bar = document.createElement("a-cylinder");
+
+        bar.setAttribute('position',`${rowPositions[i]} ${columnPositions[j]+0.5} ${dataArray[i][j]/20}`);
+        bar.setAttribute('rotation','90 0 0')
+        bar.setAttribute('radius',0.2);
+        bar.setAttribute('height',`${dataArray[i][j]/10}`);
+        bar.setAttribute('color',`${colorScheme(rowPositions[i])}`);
+        bar.setAttribute('opacity','0.7')
+        plane1.appendChild(bar);
+      };
+    };
+
+  };
+
+  });
+</script>
 </html>
-
-
-
