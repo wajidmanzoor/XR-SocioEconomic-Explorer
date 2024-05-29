@@ -99,6 +99,7 @@
               rowLabelFront.setAttribute("color","#000");
               rowLabelFront.setAttribute('position', `${rowPositions[i]} ${-1*(height/2)} 0 `);
               rowLabelFront.setAttribute('rotation','0 0 90 ');
+              rowLabelFront.setAttribute('class', "row-label");
               plane.appendChild(rowLabelFront);
               
               const rowLabelBack = document.createElement('a-text');
@@ -107,7 +108,7 @@
               rowLabelBack.setAttribute("color","#000");
               rowLabelBack.setAttribute('position', `${rowPositions[i]} ${height/2-1} 0 `);
               rowLabelBack.setAttribute('rotation','0 0 90 ');
-              plane.appendChild(rowLabelBack);        
+              plane.appendChild(rowLabelBack);       
         };
 
       const plane1 = document.createElement('a-plane');
@@ -131,10 +132,22 @@
         bar.setAttribute('radius',0.2);
         bar.setAttribute('height',`${dataArray[i][j]/10}`);
         bar.setAttribute('color',`${colorScheme(rowPositions[i])}`);
-        bar.setAttribute('opacity','0.7')
+        bar.setAttribute('opacity','0.7');
+        bar.setAttribute('class', `${rowNames[i]}`);
+        bar.setAttribute('visible', 'true');
         plane1.appendChild(bar);
       };
     };
+
+    document.querySelectorAll('.row-label').forEach(label => {
+      label.addEventListener('click', (event) => {
+        const rowName = event.target.getAttribute('data-row');
+        document.querySelectorAll(`.${rowName}`).forEach(bar => {
+          const currentVisibility = bar.getAttribute('visible');
+          bar.setAttribute('visible', currentVisibility === 'true' ? 'false' : 'true');
+        });
+      });
+    });
 
   };
 
